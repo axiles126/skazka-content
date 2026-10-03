@@ -1,0 +1,32 @@
+name: publish-audio
+# Новые MP3 кладутся в incoming/ — workflow переносит их в релиз "audio"
+# (ссылки в catalog.json ведут туда) и убирает из репозитория, чтобы он не разрастался.
+on:
+  push:
+    branches: [main]
+    paths: ["incoming/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Загрузить в релиз audio
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          files=(incoming/*.mp3)
+          [ ${#files[@]} -eq 0 ] && { echo "нечего публиковать"; exit 0; }
+          gh release view audio >/dev/null 2>&1 || \
+            gh release create audio --title "Озвучка" --notes "Аудио сказок. Ссылки на файлы — в catalog.json."
+          gh release upload audio "${files[@]}" --clobber
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -q "${files[@]}"
+          git commit -m "Озвучка опубликована в релиз audio (${#files[@]} файлов)"
+          git push
