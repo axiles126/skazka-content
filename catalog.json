@@ -1,0 +1,179 @@
+{
+ "version": 1,
+ "stories": [
+  {
+   "id": "ripka",
+   "lang": "uk",
+   "title": "Ріпка",
+   "meta": "українська народна казка · 2 хв",
+   "paragraphs": [
+    "[warmly, slowly, like opening a storybook] Ріпка.",
+    "[gently, with a smile] Посадив дід ріпку. [with growing wonder] Росла ріпка, росла, і виросла [amazed, stretching the words] велика-превелика!",
+    "Пішов дід ріпку рвати. [straining, pulling hard] Тягне-потягне, [disappointed sigh] а витягти не може.",
+    "[calling out] Покликав дід бабу. [playful rhythm] Баба за діда, дід за ріпку. [straining] Тягнуть-потягнуть, [sighs] а витягти не можуть.",
+    "[calling out] Покликала баба онучку. [playful rhythm, a bit faster] Онучка за бабу, баба за діда, дід за ріпку. [straining harder] Тягнуть-потягнуть, [sighs] а витягти не можуть.",
+    "[calling, cheerful] Покликала онучка Сірка. [playful rhythm, building up] Сірко за онучку, онучка за бабу, баба за діда, дід за ріпку. [straining with effort] Тягнуть-потягнуть, [sighs, a little tired] а витягти не можуть.",
+    "[calling, sweetly] Покликав Сірко кицю. [playful rhythm, building up] Киця за Сірка, Сірко за онучку, онучка за бабу, баба за діда, дід за ріпку. [straining with all their might] Тягнуть-потягнуть, [sighs] а витягти не можуть.",
+    "[tiny, gentle voice] Покликала киця мишку. [building suspense, faster] Мишка за кицю, киця за Сірка, Сірко за онучку, онучка за бабу, баба за діда, дід за ріпку. [one last big effort] Тягнуть-потягнуть, [joyful, triumphant] і витягли ріпку!",
+    "[softly, smiling, slowing down] От і казочці кінець, а хто слухав, той молодець. [whispering, tenderly] На добраніч."
+   ],
+   "voices": [
+    {
+     "name": "gemini-3.1-flash-tts-preview/Achernar",
+     "label": "Achernar",
+     "gender": "FEMALE",
+     "weights": [
+      6,
+      66,
+      56,
+      86,
+      106,
+      124,
+      136,
+      148,
+      61
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-ripka-Achernar.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Aoede",
+     "label": "Aoede",
+     "gender": "FEMALE",
+     "weights": [
+      6,
+      66,
+      56,
+      86,
+      106,
+      124,
+      136,
+      148,
+      61
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-ripka-Aoede.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Charon",
+     "label": "Charon",
+     "gender": "MALE",
+     "weights": [
+      6,
+      66,
+      56,
+      86,
+      106,
+      124,
+      136,
+      148,
+      61
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-ripka-Charon.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Orus",
+     "label": "Orus",
+     "gender": "MALE",
+     "weights": [
+      6,
+      66,
+      56,
+      86,
+      106,
+      124,
+      136,
+      148,
+      61
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-ripka-Orus.mp3"
+    }
+   ]
+  },
+  {
+   "id": "repka",
+   "lang": "ru",
+   "title": "Репка",
+   "meta": "русская народная сказка · 2 мин",
+   "paragraphs": [
+    "[warmly, slowly, like opening a storybook] Репка.",
+    "[gently, with a smile] Посадил дед репку. [with growing wonder] Росла репка, росла, и выросла [amazed, stretching the words] большая-пребольшая!",
+    "Пошёл дед репку рвать. [straining, pulling hard] Тянет-потянет, [disappointed sigh] а вытянуть не может.",
+    "[calling out] Позвал дед бабку. [playful rhythm] Бабка за дедку, дедка за репку. [straining] Тянут-потянут, [sighs] а вытянуть не могут.",
+    "[calling out] Позвала бабка внучку. [playful rhythm, a bit faster] Внучка за бабку, бабка за дедку, дедка за репку. [straining harder] Тянут-потянут, [sighs] а вытянуть не могут.",
+    "[calling, cheerful] Позвала внучка Жучку. [playful rhythm, building up] Жучка за внучку, внучка за бабку, бабка за дедку, дедка за репку. [straining with effort] Тянут-потянут, [sighs, a little tired] а вытянуть не могут.",
+    "[calling, sweetly] Позвала Жучка кошку. [playful rhythm, building up] Кошка за Жучку, Жучка за внучку, внучка за бабку, бабка за дедку, дедка за репку. [straining with all their might] Тянут-потянут, [sighs] а вытянуть не могут.",
+    "[tiny, gentle voice] Позвала кошка мышку. [building suspense, faster] Мышка за кошку, кошка за Жучку, Жучка за внучку, внучка за бабку, бабка за дедку, дедка за репку. [one last big effort] Тянут-потянут, [joyful, triumphant] и вытянули репку!",
+    "[softly, smiling, slowing down] Вот и сказочке конец, а кто слушал, молодец. [whispering, tenderly] Спокойной ночи."
+   ],
+   "voices": [
+    {
+     "name": "gemini-3.1-flash-tts-preview/Achernar",
+     "label": "Achernar",
+     "gender": "FEMALE",
+     "weights": [
+      6,
+      68,
+      58,
+      85,
+      106,
+      123,
+      138,
+      151,
+      60
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-repka-Achernar.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Aoede",
+     "label": "Aoede",
+     "gender": "FEMALE",
+     "weights": [
+      6,
+      68,
+      58,
+      85,
+      106,
+      123,
+      138,
+      151,
+      60
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-repka-Aoede.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Charon",
+     "label": "Charon",
+     "gender": "MALE",
+     "weights": [
+      6,
+      68,
+      58,
+      85,
+      106,
+      123,
+      138,
+      151,
+      60
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-repka-Charon.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Orus",
+     "label": "Orus",
+     "gender": "MALE",
+     "weights": [
+      6,
+      68,
+      58,
+      85,
+      106,
+      123,
+      138,
+      151,
+      60
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-repka-Orus.mp3"
+    }
+   ]
+  }
+ ]
+}
