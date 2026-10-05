@@ -14,6 +14,10 @@ on:
       only:
         description: "Только эти id через запятую (пусто = по порядку)"
         required: false
+      check:
+        description: "Только проверить источники (без Gemini, бесплатно)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -47,6 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           LIMIT: ${{ github.event_name == 'push' && '2' || inputs.limit }}
           ONLY: ${{ inputs.only }}
+          CHECK: ${{ inputs.check && '1' || '' }}
         run: python3 tools/build_library.py
 
       - name: Сохранить catalog.json и черновики

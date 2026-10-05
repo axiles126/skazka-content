@@ -45,8 +45,10 @@ VOICES = [("Achernar", "FEMALE"), ("Aoede", "FEMALE"), ("Charon", "MALE"), ("Oru
 LIMIT = int(os.environ.get("LIMIT", "") or "0")
 ONLY = {s.strip() for s in os.environ.get("ONLY", "").split(",") if s.strip()}
 DRY = os.environ.get("DRY_RUN") == "1"
+CHECK = os.environ.get("CHECK") == "1"   # только проверить источники, без Gemini
 CHUNK_CHARS = 4000
-PROMPT_VERSION = 1          # поменять, если правится промпт — тексты перегенерируются
+SOURCE_LIMIT = 30000
+PROMPT_VERSION = 2          # поменять, если правится промпт — тексты перегенерируются
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
@@ -113,7 +115,9 @@ def fetch_source(url: str) -> str:
                                 include_tables=False) or "").strip()
     if len(text) < 200:
         raise RuntimeError(f"на странице мало текста ({len(text)} симв.)")
-    return text[:12000]
+    if len(text) > SOURCE_LIMIT:
+        print(f"::warning::{url}: текст {len(text)} симв., обрезан до {SOURCE_LIMIT}")
+    return text[:SOURCE_LIMIT]
 
 
 # ---------- текст ----------
@@ -136,6 +140,10 @@ def prompt_full(source: str, lang: str) -> str:
 1. Убрать мусор сайта (меню, рекламу, подписи, не относящиеся к сказке фразы).
 2. Если язык текста не совпадает с {ln} — аккуратно
    перевести, сохранив стиль и все детали, а не пересказать своими словами.
+   Если текст в старой орфографии (ѣ, і, ъ на конце слов) или с диалектными словами
+   (это может быть фольклорная запись XIX века) — привести к современной орфографии,
+   а непонятные ребёнку старинные и диалектные слова заменить понятными, не меняя событий.
+   Сноски, номера вариантов и примечания собирателя — отбросить.
 3. Уровень языка под возраст: простые, понятные предложения средней длины — без усложнения.
    Это про то, НАСКОЛЬКО простыми словами рассказан тот же сюжет — не сокращай и не меняй сами события.
 4. Разбить на естественные абзацы для чтения вслух.
@@ -316,7 +324,27 @@ def process(cat: dict, item: dict) -> None:
         print(f"  {voice}: {dur:.0f} с")
 
 
+def check() -> int:
+    """Проверка всех источников library.json: открываются ли и сколько в них текста."""
+    items = json.loads(LIBRARY.read_text(encoding="utf-8"))
+    bad, lines = 0, []
+    for it in items:
+        try:
+            t = fetch_source(it["url"])
+            head = " ".join(t.split())[:50]
+            lines.append(f"ok  {it['lang']}/{it['id']}: {len(t)} — {head}")
+        except Exception as e:
+            bad += 1
+            lines.append(f"ERR {it['lang']}/{it['id']}: {e}")
+        time.sleep(1)
+    print("\n".join(lines))
+    print(f"::notice title=Источники: {len(items) - bad} ok, {bad} ошибок::" + "%0A".join(lines))
+    return 0
+
+
 def main() -> int:
+    if CHECK:
+        return check()
     if not KEY:
         print("::error::Нет секрета GCP_TTS_KEY (Settings → Secrets and variables → Actions)")
         return 1
