@@ -174,6 +174,157 @@
      "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-repka-Orus.mp3"
     }
    ]
+  },
+  {
+   "id": "zayets-i-zhaba",
+   "lang": "uk",
+   "title": "Заєць і жаба",
+   "meta": "українська народна казка · 1 хв",
+   "paragraphs": [
+    "[calmly] Обридло зайцеві погане його життя. [softly] Чоловік кривдить, орел хапає, і навіть сова дере. [sighs] От і думає собі заєць: «Я найслабший від усіх тварин, усього боюся, [whispering] піду краще втоплюся!»",
+    "[gently] От іде він до річки та скаче берегом, шукає, де б то краще скочити у воду. [softly] Коли це поруч жаба — [whispering] плиг у воду!",
+    "[amazed] «Еге, — [warmly] думає тоді заєць, — не буду я топитися, бо є ще такі на світі, що й мене бояться». [calmly] Так і зостався заєць живий."
+   ],
+   "voices": [
+    {
+     "name": "gemini-3.1-flash-tts-preview/Achernar",
+     "label": "Achernar",
+     "gender": "FEMALE",
+     "hash": "29fc2fb31b31",
+     "weights": [
+      174,
+      108,
+      118
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-zayets-i-zhaba-Achernar-29fc2fb31b31.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Aoede",
+     "label": "Aoede",
+     "gender": "FEMALE",
+     "hash": "27f79fef0e7e",
+     "weights": [
+      174,
+      108,
+      118
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-zayets-i-zhaba-Aoede-27f79fef0e7e.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Charon",
+     "label": "Charon",
+     "gender": "MALE",
+     "hash": "2f5364232f11",
+     "weights": [
+      174,
+      108,
+      118
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-zayets-i-zhaba-Charon-2f5364232f11.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Orus",
+     "label": "Orus",
+     "gender": "MALE",
+     "hash": "20bc3b35a4f8",
+     "weights": [
+      174,
+      108,
+      118
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/uk-zayets-i-zhaba-Orus-20bc3b35a4f8.mp3"
+    }
+   ],
+   "src": "https://gumoreska.in.ua/zayets-i-zhaba-narodna-kazka/",
+   "hash": "87eb3891c8d5"
+  },
+  {
+   "id": "lisa-i-zhuravl",
+   "lang": "ru",
+   "title": "Лиса и журавль",
+   "meta": "русская народная сказка · 2 мин",
+   "paragraphs": [
+    "[calmly] Подружилась лиса с журавлём и даже стали они кумовьями. Вот и вздумала однажды лиса угостить журавля и позвала его к себе в гости: [warmly, invitingly] «Приходи, куманёк, приходи, дорогой! Уж как я тебя угощу!»",
+    "[softly] Пришёл журавль на званый обед. А лиса наварила манной каши, размазала её по плоской тарелке, подала на стол и потчует: [sweetly] «Кушай, мой милый куманёк! Сама варила».",
+    "[quietly] Журавль стучал-стучал носом по тарелке, хлоп-хлоп — ничего в клюв не попадает! А лисичка тем временем лижет да лижет кашу, [whispering] так всю сама и съела.",
+    "[gently] Каша кончилась, и лисица говорит: [softly, apologetic] «Не обижайся, любезный кум! Больше угостить нечем». [calmly] Журавль отвечает: «Спасибо, кума, и на этом. Приходи теперь ты ко мне в гости».",
+    "[calmly] На другой день прибежала лиса к журавлю. А журавль приготовил вкусную окрошку, налил её в высокий кувшин с узким горлышком, поставил на стол и говорит: [warmly] «Кушай, кумушка! Больше угощать нечем».",
+    "[softly] Лиса давай крутиться вокруг кувшина: и с одной стороны подойдёт, и с другой, и лизнёт его, и понюхает — а достать ничего не может. Не пролезает голова в узкое горлышко! А журавль стоит, клюёт себе потихоньку, [whispering] пока всё до капельки не доел.",
+    "[gently] Журавль говорит: [softly] «Ну, не обижайся, кума! Больше угощать нечем». [sighs] Взяла лису досада: думала наесться на целую неделю, а пошла домой голодная, ни с чем.",
+    "[soothingly, sleepy] Как аукнулось, так и откликнулось! С тех пор и дружба у лисы с журавлём закончилась. [whispering] Спи и ты сладко-сладко, баю-бай."
+   ],
+   "voices": [
+    {
+     "name": "gemini-3.1-flash-tts-preview/Achernar",
+     "label": "Achernar",
+     "gender": "FEMALE",
+     "hash": "f4ecc0dc0f5e",
+     "weights": [
+      189,
+      159,
+      144,
+      165,
+      191,
+      238,
+      149,
+      117
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-lisa-i-zhuravl-Achernar-f4ecc0dc0f5e.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Aoede",
+     "label": "Aoede",
+     "gender": "FEMALE",
+     "hash": "e83e920db081",
+     "weights": [
+      189,
+      159,
+      144,
+      165,
+      191,
+      238,
+      149,
+      117
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-lisa-i-zhuravl-Aoede-e83e920db081.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Charon",
+     "label": "Charon",
+     "gender": "MALE",
+     "hash": "7df13ea8a88a",
+     "weights": [
+      189,
+      159,
+      144,
+      165,
+      191,
+      238,
+      149,
+      117
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-lisa-i-zhuravl-Charon-7df13ea8a88a.mp3"
+    },
+    {
+     "name": "gemini-3.1-flash-tts-preview/Orus",
+     "label": "Orus",
+     "gender": "MALE",
+     "hash": "aa72d6c2261c",
+     "weights": [
+      189,
+      159,
+      144,
+      165,
+      191,
+      238,
+      149,
+      117
+     ],
+     "url": "https://github.com/axiles126/skazka-content/releases/download/audio/ru-lisa-i-zhuravl-Orus-aa72d6c2261c.mp3"
+    }
+   ],
+   "src": "https://ru.wikisource.org/wiki/%D0%9D%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D1%8B%D0%B5_%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B5_%D1%81%D0%BA%D0%B0%D0%B7%D0%BA%D0%B8_%28%D0%90%D1%84%D0%B0%D0%BD%D0%B0%D1%81%D1%8C%D0%B5%D0%B2%29/%D0%9B%D0%B8%D1%81%D0%B0_%D0%B8_%D0%B6%D1%83%D1%80%D0%B0%D0%B2%D0%BB%D1%8C",
+   "hash": "64a3339a9a54"
   }
  ]
 }
