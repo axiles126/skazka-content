@@ -42,10 +42,12 @@ KEY = os.environ.get("GCP_TTS_KEY", "").strip()
 TEXT_MODEL = os.environ.get("TEXT_MODEL", "").strip() or "gemini-3.8-flash"
 TTS_MODEL = os.environ.get("TTS_MODEL", "").strip() or "gemini-3.1-flash-tts-preview"
 ALL_VOICES = [("Achernar", "FEMALE"), ("Aoede", "FEMALE"), ("Charon", "MALE"), ("Orus", "MALE")]
-# Заранее озвучиваем только голос по умолчанию — остальные приложение заказывает у
-# Cloud Function generate-story (режим voice_for) при первом выборе, дальше из кеша.
-# Все 4 сразу: VOICES=all
-VOICES = ALL_VOICES if os.environ.get("VOICES", "").strip() == "all" else ALL_VOICES[:1]
+# По умолчанию заранее НЕ озвучиваем ничего — только готовим текст (копейки). Голос
+# озвучивается, когда пользователь впервые включает сказку: приложение заказывает его у
+# Cloud Function generate-story (режим voice_for), дальше всем из кеша.
+# VOICES=default — заранее только Achernar, VOICES=all — все 4.
+_V = os.environ.get("VOICES", "").strip()
+VOICES = ALL_VOICES if _V == "all" else ALL_VOICES[:1] if _V == "default" else []
 LIMIT = int(os.environ.get("LIMIT", "") or "0")
 ONLY = {s.strip() for s in os.environ.get("ONLY", "").split(",") if s.strip()}
 DRY = os.environ.get("DRY_RUN") == "1"
@@ -328,6 +330,13 @@ def process(cat: dict, item: dict) -> None:
         st["voices"] = []                       # текст поменялся — старая озвучка не подходит
     old = {v["label"]: v for v in (st or {}).get("voices", [])}
     OUT.mkdir(exist_ok=True)
+    if st is None:   # сказка в каталоге сразу, даже без озвучки — её озвучат по первому выбору
+        words = sum(len(plain(p).split()) for p in paras)
+        st = {"id": sid, "lang": lang, "title": item["title"],
+              "meta": META[lang].format(max(1, round(words / 110))),
+              "paragraphs": paras, "voices": [], "src": item["url"], "hash": draft["hash"]}
+        cat["stories"].append(st)
+        save_catalog(cat)
 
     for voice, gender in VOICES:
         vh = voice_hash(draft, voice)
