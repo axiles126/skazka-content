@@ -1,0 +1,54 @@
+name: build-library
+# library.json -> текст (Gemini) + озвучка 4 голосами -> релиз "audio" + catalog.json.
+# Готовое пропускается по хешу. Квота кончилась — сделанное сохраняется.
+# Порция вручную: Actions -> build-library -> Run workflow (limit / only).
+on:
+  push:
+    branches: [main]
+    paths: ["library.json"]
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Сколько сказок за прогон (0 = все)"
+        default: "2"
+      only:
+        description: "Только эти id через запятую (пусто = по порядку)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-library
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Зависимости
+        run: |
+          command -v ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+          pip install -q trafilatura
+
+      - name: Генерация
+        env:
+          GCP_TTS_KEY: ${{ secrets.GCP_TTS_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          LIMIT: ${{ github.event_name == 'push' && '2' || inputs.limit }}
+          ONLY: ${{ inputs.only }}
+        run: python3 tools/build_library.py
+
+      - name: Сохранить catalog.json и черновики
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog.json drafts 2>/dev/null || true
+          git diff --cached --quiet && { echo "без изменений"; exit 0; }
+          git commit -m "Библиотека: новые сказки в каталоге"
+          git pull --rebase -q origin main
+          git push
