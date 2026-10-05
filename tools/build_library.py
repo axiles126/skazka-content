@@ -41,7 +41,11 @@ BASE_URL = f"https://github.com/{REPO}/releases/download/{RELEASE}"
 KEY = os.environ.get("GCP_TTS_KEY", "").strip()
 TEXT_MODEL = os.environ.get("TEXT_MODEL", "").strip() or "gemini-3.8-flash"
 TTS_MODEL = os.environ.get("TTS_MODEL", "").strip() or "gemini-3.1-flash-tts-preview"
-VOICES = [("Achernar", "FEMALE"), ("Aoede", "FEMALE"), ("Charon", "MALE"), ("Orus", "MALE")]
+ALL_VOICES = [("Achernar", "FEMALE"), ("Aoede", "FEMALE"), ("Charon", "MALE"), ("Orus", "MALE")]
+# Заранее озвучиваем только голос по умолчанию — остальные приложение заказывает у
+# Cloud Function generate-story (режим voice_for) при первом выборе, дальше из кеша.
+# Все 4 сразу: VOICES=all
+VOICES = ALL_VOICES if os.environ.get("VOICES", "").strip() == "all" else ALL_VOICES[:1]
 LIMIT = int(os.environ.get("LIMIT", "") or "0")
 ONLY = {s.strip() for s in os.environ.get("ONLY", "").split(",") if s.strip()}
 DRY = os.environ.get("DRY_RUN") == "1"
@@ -343,8 +347,8 @@ def process(cat: dict, item: dict) -> None:
             cat["stories"].append(st)
         st.update(title=item["title"], paragraphs=paras, hash=draft["hash"], src=item["url"])
         st["voices"] = [v for v in st["voices"] if v["label"] != voice] + [entry]
-        st["voices"].sort(key=lambda v: [x for x, _ in VOICES].index(v["label"])
-                          if v["label"] in dict(VOICES) else 99)
+        st["voices"].sort(key=lambda v: [x for x, _ in ALL_VOICES].index(v["label"])
+                          if v["label"] in dict(ALL_VOICES) else 99)
         save_catalog(cat)                       # сохраняем после каждого голоса
         print(f"  {voice}: {dur:.0f} с")
 
