@@ -100,6 +100,24 @@ def api(path: str, body: dict, tries: int = 4) -> dict:
 
 # ---------- источник ----------
 
+VARIANT = re.compile(r"^\d{1,3}(\[\d+\])?(\s|$)")
+NOTES = re.compile(r"^(Примечания|Комментарии|Варианты|Источник)\b")
+
+
+def first_variant(text: str) -> str:
+    """Викитека (Афанасьев): на странице все варианты сказки подряд, каждый начинается
+    с номера («95[1] Жили-были…», «96 …»). Берём первый, без сносок и примечаний."""
+    lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    if not lines or not VARIANT.match(lines[0]):
+        return text
+    out = [VARIANT.sub("", lines[0], count=1)]
+    for ln in lines[1:]:
+        if NOTES.match(ln) or (VARIANT.match(ln) and sum(map(len, out)) > 300):
+            break
+        out.append(ln)
+    return re.sub(r"\[\d+\]", "", "\n".join(out)).strip()
+
+
 def fetch_source(url: str) -> str:
     req = urllib.request.Request(url, headers={
         "User-Agent": UA, "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
@@ -115,6 +133,8 @@ def fetch_source(url: str) -> str:
                                 include_tables=False) or "").strip()
     if len(text) < 200:
         raise RuntimeError(f"на странице мало текста ({len(text)} симв.)")
+    if "wikisource.org" in url:
+        text = first_variant(text)
     if len(text) > SOURCE_LIMIT:
         print(f"::warning::{url}: текст {len(text)} симв., обрезан до {SOURCE_LIMIT}")
     return text[:SOURCE_LIMIT]
@@ -327,15 +347,17 @@ def process(cat: dict, item: dict) -> None:
 def check() -> int:
     """Проверка всех источников library.json: открываются ли и сколько в них текста."""
     items = json.loads(LIBRARY.read_text(encoding="utf-8"))
+    if ONLY:
+        items = [i for i in items if i["id"] in ONLY]
     bad, lines = 0, []
     for it in items:
         try:
             t = fetch_source(it["url"])
-            head = " ".join(t.split())[:50]
-            lines.append(f"ok  {it['lang']}/{it['id']}: {len(t)} — {head}")
+            tail = " ".join(t.split())[-40:]
+            lines.append(f"ok {it['id']} {len(t)} …{tail}")
         except Exception as e:
             bad += 1
-            lines.append(f"ERR {it['lang']}/{it['id']}: {e}")
+            lines.append(f"ERR {it['id']}: {e}")
         time.sleep(1)
     print("\n".join(lines))
     print(f"::notice title=Источники: {len(items) - bad} ok, {bad} ошибок::" + "%0A".join(lines))
