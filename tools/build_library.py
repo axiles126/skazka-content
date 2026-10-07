@@ -61,6 +61,14 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 LOCALE_NAMES = {"uk": "украинском", "ru": "русском"}
 META = {"uk": "українська народна казка · {} хв", "ru": "русская народная сказка · {} мин"}
+# origin — откуда сказка, если язык другой (украинская сказка на русском и т. п.)
+META_FOREIGN = {("ru", "uk"): "украинская народная сказка · {} мин",
+                ("uk", "ru"): "російська народна казка · {} хв"}
+
+
+def meta(item: dict, minutes: int) -> str:
+    o = item.get("origin") or item["lang"]
+    return META_FOREIGN.get((item["lang"], o), META[item["lang"]]).format(minutes)
 TAG = re.compile(r"\[[^\]]*\]\s*")
 
 
@@ -333,7 +341,7 @@ def process(cat: dict, item: dict) -> None:
     if st is None:   # сказка в каталоге сразу, даже без озвучки — её озвучат по первому выбору
         words = sum(len(plain(p).split()) for p in paras)
         st = {"id": sid, "lang": lang, "title": item["title"],
-              "meta": META[lang].format(max(1, round(words / 110))),
+              "meta": meta(item, max(1, round(words / 110))),
               "paragraphs": paras, "voices": [], "src": item["url"], "hash": draft["hash"]}
         cat["stories"].append(st)
         save_catalog(cat)
@@ -351,7 +359,7 @@ def process(cat: dict, item: dict) -> None:
                  "weights": weights, "url": f"{BASE_URL}/{mp3.name}"}
         if st is None:
             st = {"id": sid, "lang": lang, "title": item["title"],
-                  "meta": META[lang].format(max(1, round(dur / 60))),
+                  "meta": meta(item, max(1, round(dur / 60))),
                   "paragraphs": paras, "voices": [], "src": item["url"], "hash": draft["hash"]}
             cat["stories"].append(st)
         st.update(title=item["title"], paragraphs=paras, hash=draft["hash"], src=item["url"])
