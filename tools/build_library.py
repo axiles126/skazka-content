@@ -220,9 +220,17 @@ def prompt_full(source: str, lang: str) -> str:
 {{"title": "...", "meta": "народна казка · N мин", "scene": "...", "paragraphs": ["...", "..."]}}"""
 
 
+def text_hash(item: dict) -> str:
+    """rev в library.json — пересоздать текст одной сказки (старый остаётся, пока новый не готов)."""
+    parts = [item["url"], item["lang"], TEXT_MODEL, PROMPT_VERSION]
+    if item.get("rev"):
+        parts.append(item["rev"])
+    return sha(*parts)
+
+
 def make_text(item: dict) -> dict:
     """Черновик текста из drafts/ или новый через Gemini."""
-    h = sha(item["url"], item["lang"], TEXT_MODEL, PROMPT_VERSION)
+    h = text_hash(item)
     path = DRAFTS / f"{item['lang']}-{item['id']}.json"
     if path.exists():
         d = json.loads(path.read_text(encoding="utf-8"))
@@ -351,7 +359,7 @@ def is_done(cat: dict, item: dict) -> bool:
     if not d.exists():
         return False
     draft = json.loads(d.read_text(encoding="utf-8"))
-    if draft.get("hash") != sha(item["url"], item["lang"], TEXT_MODEL, PROMPT_VERSION):
+    if draft.get("hash") != text_hash(item):
         return False
     st = next((s for s in cat["stories"] if s["id"] == item["id"] and s["lang"] == item["lang"]), None)
     if not st:
@@ -370,8 +378,11 @@ def process(cat: dict, item: dict) -> None:
     paras = draft["paragraphs"]
     weights = [max(1, len(plain(p))) for p in paras]
     st = next((s for s in cat["stories"] if s["id"] == sid and s["lang"] == lang), None)
-    if st and st.get("hash") != draft["hash"]:
-        st["voices"] = []                       # текст поменялся — старая озвучка не подходит
+    if st and st.get("hash") != draft["hash"]:  # текст пересоздан — обновляем, старая озвучка не подходит
+        words = sum(len(plain(p).split()) for p in paras)
+        st.update(title=item["title"], paragraphs=paras, hash=draft["hash"], src=item["url"],
+                  meta=meta(item, max(1, round(words / 110))), voices=[])
+        save_catalog(cat)
     old = {v["label"]: v for v in (st or {}).get("voices", [])}
     OUT.mkdir(exist_ok=True)
     if st is None:   # сказка в каталоге сразу, даже без озвучки — её озвучат по первому выбору
