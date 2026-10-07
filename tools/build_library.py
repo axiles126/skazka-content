@@ -157,6 +157,31 @@ def fetch_source(url: str) -> str:
 
 # ---------- текст ----------
 
+PART_CHARS = 5000
+PART_NOTE = """
+
+ВНИМАНИЕ: выше не вся сказка «{title}», а только её часть {k} из {n} (сказка длинная и
+разрезана по абзацам). Подготовь ТОЛЬКО эту часть — полностью, каждое событие и каждую
+реплику, без сокращений. Не начинай сказку заново, если это не первая часть, и не
+заканчивай её, если это не последняя: последний абзац — ровно там, где кончается эта часть.
+Поля title и scene заполни как обычно."""
+
+
+def split_source(text: str) -> list:
+    if len(text) <= PART_CHARS + 1500:
+        return [text]
+    out, cur = [], ""
+    for ln in text.split("\n"):
+        if cur and len(cur) + len(ln) > PART_CHARS:
+            out.append(cur); cur = ""
+        cur += ln + "\n"
+    if cur.strip():
+        if out and len(cur) < 1200:
+            out[-1] += cur
+        else:
+            out.append(cur)
+    return out
+
 def prompt_full(source: str, lang: str) -> str:
     # = story_prompt_full из Note/tools/cloud_function/generate_story/main.py, age=4, tone=calm
     ln = LOCALE_NAMES.get(lang, "украинском")
@@ -204,12 +229,23 @@ def make_text(item: dict) -> dict:
         if d.get("hash") == h:
             return d
     source = fetch_source(item["url"])
-    r = api(f"models/{TEXT_MODEL}:generateContent", {
-        "contents": [{"parts": [{"text": prompt_full(source, item["lang"])}]}],
-        "generationConfig": {"responseMimeType": "application/json"}})
-    raw = r["candidates"][0]["content"]["parts"][0]["text"]
-    s = json.loads(raw)
-    paras = [p.strip() for p in s.get("paragraphs", []) if plain(p)]
+    # Длинную сказку Gemini за один раз сокращает (15 тыс. -> 6) — режем на части
+    # по абзацам и готовим каждую отдельно, потом склеиваем.
+    parts = split_source(source)
+    s, paras = {}, []
+    for k, part in enumerate(parts, 1):
+        prompt = prompt_full(part, item["lang"])
+        if len(parts) > 1:
+            prompt += PART_NOTE.format(k=k, n=len(parts), title=item["title"])
+        r = api(f"models/{TEXT_MODEL}:generateContent", {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"responseMimeType": "application/json"}})
+        got = json.loads(r["candidates"][0]["content"]["parts"][0]["text"])
+        if k == 1:
+            s = got
+        paras += [p.strip() for p in got.get("paragraphs", []) if plain(p)]
+    if len(parts) > 1:
+        print(f"  частей: {len(parts)}")
     if not paras:
         raise RuntimeError("Gemini вернул пустой текст")
     out_len = sum(len(plain(p)) for p in paras)
@@ -386,7 +422,10 @@ def check() -> int:
             lines.append(f"ERR {it['id']}: {e}")
         time.sleep(1)
     print("\n".join(lines))
-    print(f"::notice title=Источники: {len(items) - bad} ok, {bad} ошибок::" + "%0A".join(lines))
+    # аннотация обрезается по длине — выводим порциями
+    for i in range(0, len(lines), 12):
+        print(f"::notice title=Источники {i + 1}–{min(i + 12, len(lines))} "
+              f"(всего {len(items) - bad} ok, {bad} ошибок)::" + "%0A".join(lines[i:i + 12]))
     return 0
 
 
