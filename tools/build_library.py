@@ -54,7 +54,7 @@ DRY = os.environ.get("DRY_RUN") == "1"
 CHECK = os.environ.get("CHECK") == "1"   # только проверить источники, без Gemini
 CHUNK_CHARS = 4000
 SOURCE_LIMIT = 30000
-PROMPT_VERSION = 2          # поменять, если правится промпт — ВСЕ тексты и озвучка перегенерируются (платно)
+PROMPT_VERSION = 3          # 3: сказки целиком — части по 2500 симв., проверка длины, повтор при сокращении
 # Запрет отсебятины в конце добавлен без смены версии: уже готовые сказки не переделываем
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -157,7 +157,7 @@ def fetch_source(url: str) -> str:
 
 # ---------- текст ----------
 
-PART_CHARS = 5000
+PART_CHARS = 2500
 PART_NOTE = """
 
 ВНИМАНИЕ: выше не вся сказка «{title}», а только её часть {k} из {n} (сказка длинная и
@@ -167,8 +167,15 @@ PART_NOTE = """
 Поля title и scene заполни как обычно."""
 
 
+MIN_RATIO = 0.8     # часть короче 80% исходника — считаем сокращённой и повторяем
+SHORT_NOTE = """
+
+ВНИМАНИЕ: прошлый вариант получился сокращённым ({got} символов при {need} в исходнике).
+Нужен ВЕСЬ текст этой части — каждое предложение исходника, без пропусков."""
+
+
 def split_source(text: str) -> list:
-    if len(text) <= PART_CHARS + 1500:
+    if len(text) <= PART_CHARS + 700:
         return [text]
     out, cur = [], ""
     for ln in text.split("\n"):
@@ -176,7 +183,7 @@ def split_source(text: str) -> list:
             out.append(cur); cur = ""
         cur += ln + "\n"
     if cur.strip():
-        if out and len(cur) < 1200:
+        if out and len(cur) < 700:
             out[-1] += cur
         else:
             out.append(cur)
@@ -204,8 +211,10 @@ def prompt_full(source: str, lang: str) -> str:
    (это может быть фольклорная запись XIX века) — привести к современной орфографии,
    а непонятные ребёнку старинные и диалектные слова заменить понятными, не меняя событий.
    Сноски, номера вариантов и примечания собирателя — отбросить.
-3. Уровень языка под возраст: простые, понятные предложения средней длины — без усложнения.
-   Это про то, НАСКОЛЬКО простыми словами рассказан тот же сюжет — не сокращай и не меняй сами события.
+3. Текст ЦЕЛИКОМ: каждое предложение исходника должно остаться — каждое событие, каждая
+   деталь, каждая реплика и каждый повтор (повторы в сказках важны). Не сокращай, не
+   пересказывай короче, не объединяй и не выбрасывай предложения. Разрешено только заменить
+   непонятное ребёнку слово понятным. Длина результата — примерно как у самой сказки в исходнике.
 4. Разбить на естественные абзацы для чтения вслух.
 5. Перед репликами и важными словами поставить режиссёрские метки на английском в
    квадратных скобках для озвучки — например [warmly], [sighs], [amazed], [whispering].
@@ -241,19 +250,32 @@ def make_text(item: dict) -> dict:
     # по абзацам и готовим каждую отдельно, потом склеиваем.
     parts = split_source(source)
     s, paras = {}, []
+    short = 0
     for k, part in enumerate(parts, 1):
         prompt = prompt_full(part, item["lang"])
         if len(parts) > 1:
             prompt += PART_NOTE.format(k=k, n=len(parts), title=item["title"])
-        r = api(f"models/{TEXT_MODEL}:generateContent", {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"responseMimeType": "application/json"}})
-        got = json.loads(r["candidates"][0]["content"]["parts"][0]["text"])
+        best, best_len = None, -1
+        for attempt in range(2):
+            extra = "" if attempt == 0 else SHORT_NOTE.format(got=best_len, need=len(part))
+            r = api(f"models/{TEXT_MODEL}:generateContent", {
+                "contents": [{"parts": [{"text": prompt + extra}]}],
+                "generationConfig": {"responseMimeType": "application/json"}})
+            got = json.loads(r["candidates"][0]["content"]["parts"][0]["text"])
+            n = sum(len(plain(p)) for p in got.get("paragraphs", []))
+            if n > best_len:
+                best, best_len = got, n
+            if n >= len(part) * MIN_RATIO:
+                break
+            print(f"  часть {k}: {n} из {len(part)} симв. — похоже на сокращение, повтор")
+        if best_len < len(part) * MIN_RATIO:
+            short += 1
         if k == 1:
-            s = got
-        paras += [p.strip() for p in got.get("paragraphs", []) if plain(p)]
-    if len(parts) > 1:
-        print(f"  частей: {len(parts)}")
+            s = best
+        paras += [p.strip() for p in best.get("paragraphs", []) if plain(p)]
+    print(f"  частей: {len(parts)}, {sum(len(plain(p)) for p in paras)} из {len(source)} симв.")
+    if short:
+        print(f"::warning::{item['id']} ({item['lang']}): {short} из {len(parts)} частей короче исходника и после повтора — проверь")
     if not paras:
         raise RuntimeError("Gemini вернул пустой текст")
     out_len = sum(len(plain(p)) for p in paras)
