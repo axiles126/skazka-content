@@ -53,7 +53,7 @@ ONLY = {s.strip() for s in os.environ.get("ONLY", "").split(",") if s.strip()}
 DRY = os.environ.get("DRY_RUN") == "1"
 CHECK = os.environ.get("CHECK") == "1"   # только проверить источники, без Gemini
 CHUNK_CHARS = 4000
-SOURCE_LIMIT = 30000
+SOURCE_LIMIT = 80000
 PROMPT_VERSION = 3          # 3: сказки целиком — части по 2500 симв., проверка длины, повтор при сокращении
 # Запрет отсебятины в конце добавлен без смены версии: уже готовые сказки не переделываем
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta"
