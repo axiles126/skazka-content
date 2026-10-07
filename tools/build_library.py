@@ -462,9 +462,55 @@ def check() -> int:
     return 0
 
 
+SOURCES = ROOT / "sources"
+MODE = os.environ.get("MODE", "").strip() or "copy"
+
+
+def copy_sources() -> int:
+    """MODE=copy (по умолчанию, бесплатно, без ИИ): оригинал каждой сказки копируется как есть
+    в sources/, в каталоге — только название. Полный текст для чтения вслух готовит сервер
+    (generate-story, режим lib_text), когда сказку впервые выбирают, и кеширует для всех."""
+    items = json.loads(LIBRARY.read_text(encoding="utf-8"))
+    if ONLY:
+        items = [i for i in items if i["id"] in ONLY]
+    cat = load_catalog()
+    SOURCES.mkdir(exist_ok=True)
+    done = failed = 0
+    for it in items:
+        f = SOURCES / f"{sha(it['url'])}.txt"
+        try:
+            if not f.exists():
+                f.write_text(fetch_source(it["url"]).strip() + "\n", encoding="utf-8")
+                time.sleep(1)
+            words = len(f.read_text(encoding="utf-8").split())
+        except Exception as e:
+            failed += 1
+            print(f"::warning::{it['lang']}/{it['id']}: источник не скопирован — {str(e)[:200]}")
+            continue
+        entry = {"id": it["id"], "lang": it["lang"], "title": it["title"],
+                 "meta": meta(it, max(1, round(words / 110))), "paragraphs": [], "voices": [],
+                 "lazy": True, "source": f"sources/{f.name}", "src": it["url"]}
+        if it.get("origin"):
+            entry["origin"] = it["origin"]
+        i = next((k for k, x in enumerate(cat["stories"]) if x["id"] == it["id"] and x["lang"] == it["lang"]), None)
+        if i is None:
+            cat["stories"].append(entry)
+        else:
+            cat["stories"][i] = entry
+        done += 1
+    save_catalog(cat)
+    print(f"Скопировано: {done}, ошибок: {failed}")
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+            fh.write(f"Скопировано: **{done}**, ошибок: {failed}\n")
+    return 0
+
+
 def main() -> int:
     if CHECK:
         return check()
+    if MODE == "copy":
+        return copy_sources()
     if not KEY:
         print("::error::Нет секрета GCP_TTS_KEY (Settings → Secrets and variables → Actions)")
         return 1
